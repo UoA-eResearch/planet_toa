@@ -26,16 +26,16 @@ for folder in args.folders:
     try:
       i = int(bn) - 1
       value = node.getElementsByTagName("ps:reflectanceCoefficient")[0].firstChild.data
-      bands[i] *= float(value)
+      bands[i] *= float(value) * 10000
     except ValueError:
       print("{} doesn't look like a channel".format(bn))
 
   # Set spatial characteristics of the output object to mirror the input
   kwargs = src.meta
-  kwargs.update(dtype=rasterio.float64)
+  kwargs.update(compress='lzw')
 
   processed_filename = tif_file.replace("Analytic.tif", "Analytic_toa.tif")
 
   with rasterio.open(processed_filename, 'w', **kwargs) as dst:
-    dst.write(bands)
+    dst.write(bands.astype(rasterio.uint16))
   print("{} done".format(folder))
