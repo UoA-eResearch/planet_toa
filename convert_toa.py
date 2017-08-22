@@ -11,8 +11,16 @@ parser.add_argument('folders', type=str, nargs='+', help='the folders containing
 args = parser.parse_args()
 
 for folder in args.folders:
-  tif_file = glob.glob(os.path.join(folder, "*BGRN_Analytic.tif"))[0]
-  xml_file = glob.glob(os.path.join(folder, "*BGRN_Analytic_metadata.xml"))[0]
+  try:
+    tif_file = glob.glob(os.path.join(folder, "*BGRN_Analytic.tif"))[0]
+  except IndexError:
+    print("Couldn't find a BGRN_Analytic tif in {}".format(folder))
+    continue
+  try:
+    xml_file = glob.glob(os.path.join(folder, "*BGRN_Analytic_metadata.xml"))[0]
+  except IndexError:
+    print("Couldn't find a BGRN_Analytic_metadata xml in {}".format(folder))
+    continue
 
   with rasterio.open(tif_file) as src:
     bands = src.read().astype(float)
