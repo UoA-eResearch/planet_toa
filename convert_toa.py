@@ -11,6 +11,7 @@ import datetime
 parser = argparse.ArgumentParser(description='Convert Planet TIFs to TOA')
 parser.add_argument('folders', type=str, nargs='+', help='the folders containing TIFs')
 parser.add_argument('-c', '--clobber', action="store_true", help='Whether to overwrite existing toa tiffs')
+parser.add_argument('-e', '--ephem', action="store_true", help='Whether to use ephem for sun distance calculation')
 args = parser.parse_args()
 
 EAI = [1997.8, 1863.5, 1560.4, 1395.0, 1124.4] # Exo-Atmospheric Irradiance as per https://www.planet.com/products/satellite-imagery/files/160625-RapidEye%20Image-Product-Specifications.pdf
@@ -53,7 +54,13 @@ for i, folder in enumerate(args.folders):
       acquisitionDate = xmldoc.getElementsByTagName("re:acquisitionDateTime")[0].firstChild.data
       dt = datetime.datetime.strptime(acquisitionDate, "%Y-%m-%dT%H:%M:%S.%fZ")
       day = dt.timetuple().tm_yday
-      sun_distance = 1 - 0.01672 * math.cos(math.radians(0.9856 * (day - 4)))
+      if args.ephem:
+        import ephem
+        sun = ephem.Sun()
+        sun.compute(dt)
+        sun_distance = sun.earth_distance
+      else:
+        sun_distance = 1 - 0.01672 * math.cos(math.radians(0.9856 * (day - 4)))
       solar_zenith_rad = math.radians(90 - solar_elevation_angle_deg)
 
     nodes = xmldoc.getElementsByTagNameNS("*", "bandSpecificMetadata")
@@ -81,4 +88,4 @@ for i, folder in enumerate(args.folders):
     with rasterio.open(processed_filename, 'w', **kwargs) as dst:
       dst.write(bands.astype(rasterio.uint16))
   except Exception as e:
-    print("ERROR! : " + e)
+    print("ERROR! : {}".format(e))
