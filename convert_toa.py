@@ -18,19 +18,19 @@ EAI = [1997.8, 1863.5, 1560.4, 1395.0, 1124.4] # Exo-Atmospheric Irradiance as p
 
 for i, folder in enumerate(args.folders):
   print("processing {}/{} - {}".format(i, len(args.folders), folder))
-  toa_file = glob.glob(os.path.join(folder, "**/*Analytic_toa.tif"), recursive=True)
+  toa_file = glob.glob(os.path.join(folder, "**", "*Analytic_toa.tif"), recursive=True)
   if toa_file and not args.clobber:
     print(folder + " already processed")
     continue
   tif_file = None
   mode = None
   try:
-    tif_file = glob.glob(os.path.join(folder, "**/*BGRN_Analytic.tif"), recursive=True)[0]
+    tif_file = glob.glob(os.path.join(folder, "**", "*BGRN_Analytic.tif"), recursive=True)[0]
     mode = "BGRN"
   except IndexError:
     pass
   try:
-    tif_file = glob.glob(os.path.join(folder, "**/*3A_Analytic.tif"), recursive=True)[0]
+    tif_file = glob.glob(os.path.join(folder, "**", "*3A_Analytic.tif"), recursive=True)[0]
     mode = "3A"
   except IndexError:
     pass
@@ -38,7 +38,7 @@ for i, folder in enumerate(args.folders):
     print("Couldn't find an _Analytic tif in {}".format(folder))
     continue
   try:
-    xml_file = glob.glob(os.path.join(folder, "**/*_Analytic_metadata.xml"), recursive=True)[0]
+    xml_file = glob.glob(os.path.join(folder, "**", "*_Analytic_metadata.xml"), recursive=True)[0]
   except IndexError:
     print("Couldn't find an _Analytic_metadata xml in {}".format(folder))
     continue
